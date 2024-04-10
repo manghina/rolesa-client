@@ -641,9 +641,12 @@ function UpdateProfile() {
                                   </h6>
                                 </div>
                                 <div className="ui-block-content">
-                                  {/* Form Hobbies and Interests */}
+                          
 
-                                  {/* <form>
+                                  {
+                                  
+                                  
+                                  <form>
                                     <div className="row">
                                       <div className="col col-lg-6 col-md-6 col-sm-12 col-12">
                                         <div className="form-group">
@@ -736,9 +739,10 @@ function UpdateProfile() {
                                         </button>
                                       </div>
                                     </div>
-                                  </form> */}
+                                  </form> 
+                                  }
 
-                                  {/* ... end Form Hobbies and Interests */}
+               
                                 </div>
                               </div>
                             </div>
