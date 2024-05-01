@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
+
 
 function Header() {
+    const navigateTo = useNavigate();
     const logout = () => localStorage.clear('user');
-    const user = JSON.parse(localStorage.getItem('user'))
-    const [username, setUsernName] = useState(user.name);
+    const user = localStorage.getItem('token')
+    const [username, setUsernName] = useState(user?.name);
+    if(!user) {
+        window.location.href = "login"
+    }
 
     return (
         <>
@@ -180,7 +186,7 @@ function Header() {
                                                 </NavLink>
                                             </li>
                                             <li>
-                                                <NavLink to="/register">
+                                                <NavLink to="/update-profile">
                                                     <svg className="olymp-menu-icon">
                                                         <use xlinkHref="#olymp-menu-icon"></use>
                                                     </svg>
@@ -230,7 +236,7 @@ function Header() {
 
                                 </div>
                             </div>
-                            <a href="02-ProfilePage.html" className="author-name fn">
+                            <div className="author-name fn">
                                 <div className="author-title">
                                     {username}
                                     <svg className="olymp-dropdown-arrow-icon">
@@ -238,7 +244,7 @@ function Header() {
                                     </svg>
                                 </div>
                                 <span className="author-subtitle"></span>
-                            </a>
+                            </div>
                         </div>
 
                     </div>

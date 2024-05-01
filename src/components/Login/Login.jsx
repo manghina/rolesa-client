@@ -11,8 +11,17 @@ function Login() {
     const [password, setPassword] = useState('12341234');
     const [birthday, seBirthDay] = useState('1989/01/01');
     const [genre, setGenre] = useState('M');
+    const [terms, setTerms] = useState(false);
     const navigateTo = useNavigate();
     const { setToken } = useAuth();
+
+    const handleChange = (e) => {
+        debugger
+    }
+    const handleChange2 = (e) => {
+        const isChecked = event.target.checked;
+        alert(isChecked)
+      }
 
     const handleMenuClick = () => {
         document.querySelector('.header-menu').classList.toggle('expanded-menu');
@@ -31,6 +40,32 @@ function Login() {
           });
           if(response.status == 200) {
 
+            localStorage.setItem("token", JSON.stringify(response.data.access_token))
+            setToken(response.data.access_token);
+            axios.interceptors.request.use(
+                (config) => {
+                  config.headers.Authorization = 'Bearer ' + response.data.access_token;
+                  return config;
+                },
+                (error) => {
+                alert("L'username o la password inserite non sono corrette")
+                  return Promise.reject(error);
+                }
+            );
+
+            try {
+
+                const response = await axios.get('/api/user', {
+
+                });
+                localStorage.setItem("user", JSON.stringify(response.data))
+                if(response.status == 200) {
+                    document.location.href = '/dashboard'
+                 // navigateTo('/dashboard')
+                }
+              } catch (error) {
+                alert("L'username o la password inserite non sono corrette")
+              }    
           }
     
         } catch (error) {
@@ -334,15 +369,20 @@ function Login() {
 
                                                 <div className="remember">
                                                     <div className="checkbox">
+                                                        <div className='box'>
+                                                            <input onChange={(e) => setTerms(!terms)} key={Math.random()} checked={terms} name="optionsCheckboxes" type="checkbox" />
+                                                        </div>
                                                         <label>
-                                                            <input name="optionsCheckboxes" type="checkbox" />
                                                             I accept the <a href="#">Terms and Conditions</a> of the website
                                                         </label>
                                                     </div>
                                                 </div>
-
-                                                <a href="#" onClick={handleRegister} className="btn btn-purple btn-lg full-width">Complete Registration!</a>
-                                            </div>
+                                                {terms ? (
+                                                    <a href="#" id='confirm-registration' onClick={handleRegister} className="btn btn-purple btn-lg full-width">Complete Registration!</a>
+                                                    ) : (
+                                                        <a href="#" id='confirm-registration' onClick={handleRegister} className="btn btn-purple btn-lg full-width disabled">Complete Registration!</a>
+                                                    )}
+                                                </div>
                                         </div>
                                     </form>
                                 </div>

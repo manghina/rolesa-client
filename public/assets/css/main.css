@@ -5175,17 +5175,13 @@ fieldset[disabled] .form-group.is-focused .checkbox label {
 }
 
 .checkbox input[type=checkbox] {
-  opacity: 0;
-  position: absolute;
   margin: 0;
-  z-index: -1;
-  width: 0;
-  height: 0;
   overflow: hidden;
   left: 0;
-  pointer-events: none;
 }
-
+.checkbox-material {
+  display: none!important;
+}
 .checkbox .checkbox-material {
   vertical-align: middle;
   position: relative;
@@ -5195,7 +5191,7 @@ fieldset[disabled] .form-group.is-focused .checkbox label {
 }
 
 .checkbox .checkbox-material:before {
-  display: block;
+  display: none;
   position: absolute;
   left: 0;
   content: "";
@@ -6761,13 +6757,22 @@ fieldset[disabled] .checkbox input[type=checkbox],
   margin: 35px 0 25px;
 }
 
+.remember .box {
+  display: flex;
+  align-items: center;
+}
+#confirm-registration.disabled {
+  background-color: gray;
+  color: black;
+}
 .remember {
   margin-bottom: 1rem;
 }
 
 .remember .checkbox {
-  display: inline-block;
+  display: flex;
   margin-bottom: 0;
+  gap: 10px;
 }
 
 .remember a {

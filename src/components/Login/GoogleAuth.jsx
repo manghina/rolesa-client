@@ -11,7 +11,7 @@ function GoogleAuth() {
     const location = useLocation();
 
     useEffect(() => {
-        fetch(`http://127.0.0.1:8000/api/auth/google/callback${location.search}`, {
+        fetch(`https://rolesa-server.webclosuresandbox.cloud/api/auth/google/callback${location.search}`, {
             headers : {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'

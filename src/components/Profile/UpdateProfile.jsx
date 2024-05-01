@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-// import axios from "../../../axios.config";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import axios from "../../../axios.config";
 
 import { Tab, TabPanel, Tabs, TabList } from "react-web-tabs";
 import ReactDOM from "react-dom";
@@ -10,11 +9,35 @@ import Header from '../Header/Header'
 import LeftSidebar from '../Sidebars/LeftSidebar'
 import RightSidebar from '../Sidebars/RightSidebar'
 
-function UpdateProfile() {
+ function UpdateProfile() {
   const user = JSON.parse(localStorage.getItem("user"));
   const [name, setName] = useState(user.name);
   // const [surname, setSurname] = useState(user.surname);
   const [email, setEmail] = useState(user.email);
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('/api/settings/1');
+        debugger
+        setData(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+
+    // Cleanup function to cancel any pending requests if the component unmounts
+    return () => {
+      // cleanup code
+    };
+  }, []); // The empty array [] as the second argument makes useEffect run only once, equivalent to componentDidMount
+
+
   // const [birthday, setBirthday] = useState(user.birthday);
   // const [genre, setGenre] = useState(user.genre);
   // const [phone, setPhone] = useState(user.phone);
@@ -164,9 +187,7 @@ function UpdateProfile() {
                             <Tab tabFor="vertical-tab-three">
                               Change Password
                             </Tab>
-                            <Tab tabFor="vertical-tab-four">
-                              Hobbies and Interests
-                            </Tab>
+
                           </TabList>
 
                           <TabPanel
@@ -215,7 +236,7 @@ function UpdateProfile() {
 
                                                     <div className="form-group date-time-picker label-floating">
                                                         <label className="control-label">Your Birthday</label>
-                                                        <input value="28-04-1998" onChange={(e) => setBirthday(e.target.value)}  name="dateTimepicker" defaultValue="10/24/1984" />
+                                                        <input  onChange={(e) => setBirthday(e.target.value)}  name="dateTimepicker" defaultValue="10/24/1984" />
                                                         <span className="input-group-addon">
                                                             <svg className="olymp-month-calendar-icon icon">
                                                                 <use xlinkHref="#olymp-month-calendar-icon"></use>
@@ -227,26 +248,26 @@ function UpdateProfile() {
                                       <div className="col col-lg-6 col-md-6 col-sm-12 col-12">
                                                     <div className="form-group label-floating">
                                                         <label className="control-label">Last Name</label>
-                                                        <input value="-" onChange={(e) => setSurname(e.target.value)}  className="form-control" placeholder="" type="text" defaultValue="Spiegel" />
+                                                        <input onChange={(e) => setSurname(e.target.value)}  className="form-control" placeholder="" type="text" defaultValue="Spiegel" />
                                                     </div>
 
                                                     <div className="form-group label-floating">
                                                         <label className="control-label">Your Website</label>
-                                                        <input value="www.website.com" onChange={(e) => setWebsite(e.target.value)}  className="form-control" placeholder="" type="email"
+                                                        <input onChange={(e) => setWebsite(e.target.value)}  className="form-control" placeholder=""
                                                             defaultValue="daydreamzagency.com" />
                                                     </div>
 
 
                                                     <div className="form-group label-floating is-empty">
                                                         <label className="control-label">Your Phone Number</label>
-                                                        <input value="-" onChange={(e) => setPhone(e.target.value)}  className="form-control" placeholder="" type="text" />
+                                                        <input onChange={(e) => setPhone(e.target.value)}  className="form-control" placeholder="" type="text" />
                                                     </div>
                                                 </div>
 
                                                 <div className="col col-lg-4 col-md-4 col-sm-12 col-12">
                                                     <div className="form-group label-floating is-select">
                                                         <label className="control-label">Your Country</label>
-                                                        <select  value="-" onChange={(e) => setCountry(e.target.value)}  className="form-select">
+                                                        <select  onChange={(e) => setCountry(e.target.value)}  className="form-select">
                                                             <option defaultValue="US">United States</option>
                                                             <option defaultValue="AU">Australia</option>
                                                         </select>
@@ -255,7 +276,7 @@ function UpdateProfile() {
                                                 <div className="col col-lg-4 col-md-4 col-sm-12 col-12">
                                                     <div className="form-group label-floating is-select">
                                                         <label className="control-label">Your State / Province</label>
-                                                        <select value="-" onChange={(e) => setState(e.target.value)}  className="form-select">
+                                                        <select onChange={(e) => setState(e.target.value)}  className="form-select">
                                                             <option defaultValue="CA">California</option>
                                                             <option defaultValue="TE">Texas</option>
                                                         </select>
@@ -264,21 +285,22 @@ function UpdateProfile() {
                                                 <div className="col col-lg-4 col-md-4 col-sm-12 col-12">
                                                     <div className="form-group label-floating is-select">
                                                         <label className="control-label">Your City</label>
-                                                        <select value="-" onChange={(e) => setCity(e.target.value)}  className="form-select">
+                                                        <select onChange={(e) => setCity(e.target.value)}  className="form-select">
                                                             <option defaultValue="SF">San Francisco</option>
                                                             <option defaultValue="NY">New York</option>
                                                         </select>
                                                     </div>
                                                 </div>
                                                 <div className="col col-lg-6 col-md-6 col-sm-12 col-12">
-                                                    <div className="form-group">
-                                                        <textarea value="-" onChange={(e) => setBio(e.target.value)}  className="form-control"
-                                                            placeholder="Write a little description about you">Hi, I’m James, I’m 36 and I work as a Digital Designer for the  “Daydreams” Agency in Pier 56</textarea>
+                                                    <div className="form-group label-floating is-select">
+                                                    <label className="control-label">Bio</label>                                                      
+                                                        <input onChange={(e) => setBio(e.target.value)}  className="form-control"
+                                                             />
                                                     </div>
 
                                                     <div className="form-group label-floating is-select">
                                                         <label className="control-label">Your Gender</label>
-                                                        <select  value="-" onChange={(e) => setGenre(e.target.value)}  className="form-select">
+                                                        <select  onChange={(e) => setGenre(e.target.value)}  className="form-select">
                                                             <option defaultValue="MA">Male</option>
                                                             <option defaultValue="FE">Female</option>
                                                         </select>
@@ -286,24 +308,24 @@ function UpdateProfile() {
 
                                                     <div className="form-group label-floating is-empty">
                                                         <label className="control-label">Religious Belifs</label>
-                                                        <input value="-" onChange={(e) => setReligion(e.target.value)}  className="form-control" placeholder="" type="text" />
+                                                        <input onChange={(e) => setReligion(e.target.value)}  className="form-control" placeholder="" type="text" />
                                                     </div>
                                                 </div>
                                                 <div className="col col-lg-6 col-md-6 col-sm-12 col-12">
                                                     <div className="form-group label-floating is-empty">
                                                         <label className="control-label">Your Birthplace</label>
-                                                        <input  value="-" onChange={(e) => setBirthplace(e.target.value)}  className="form-control" placeholder="" type="text" />
+                                                        <input  onChange={(e) => setBirthplace(e.target.value)}  className="form-control" placeholder="" type="text" />
                                                     </div>
 
                                                     <div className="form-group label-floating">
                                                         <label className="control-label">Your Occupation</label>
-                                                        <input  value="-" onChange={(e) => setWork(e.target.value)}  className="form-control" placeholder="" type="text"
+                                                        <input  onChange={(e) => setWork(e.target.value)}  className="form-control" placeholder="" type="text"
                                                             defaultValue="UI/UX Designer" />
                                                     </div>
 
                                                     <div className="form-group label-floating is-select">
                                                         <label className="control-label">Status</label>
-                                                        <select  value="-" onChange={(e) => setStatus(e.target.value)}  className="form-select">
+                                                        <select  onChange={(e) => setStatus(e.target.value)}  className="form-select">
                                                             <option defaultValue="MA">Married</option>
                                                             <option defaultValue="FE">Not Married</option>
                                                         </select>
@@ -311,13 +333,13 @@ function UpdateProfile() {
 
                                                     <div className="form-group label-floating">
                                                         <label className="control-label">Political Incline</label>
-                                                        <input value="-" onChange={(e) => setPolitic(e.target.value)}  className="form-control" placeholder="" type="text" defaultValue="Democrat" />
+                                                        <input onChange={(e) => setPolitic(e.target.value)}  className="form-control" placeholder="" type="text" defaultValue="Democrat" />
                                                     </div>
                                                 </div>
                                                 <div className="col col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                                                     <div className="form-group with-icon label-floating">
                                                         <label className="control-label">Your Facebook Account</label>
-                                                        <input value="-" onChange={(e) => setFacebook(e.target.value)}  className="form-control" type="text"
+                                                        <input onChange={(e) => setFacebook(e.target.value)}  className="form-control" type="text"
                                                             defaultValue="www.facebook.com/james-spiegel95321" />
                                                         <svg className="c-facebook" width="20" height="20">
                                                             <use xlinkHref="#olymp-facebook-icon"></use>
@@ -325,7 +347,7 @@ function UpdateProfile() {
                                                     </div>
                                                     <div className="form-group with-icon label-floating">
                                                         <label className="control-label">Your Twitter Account</label>
-                                                        <input  value="-" onChange={(e) => setTwitter(e.target.value)}  className="form-control" type="text"
+                                                        <input  onChange={(e) => setTwitter(e.target.value)}  className="form-control" type="text"
                                                             defaultValue="www.twitter.com/james_spiegelOK" />
                                                         <svg className="c-twitter" width="20" height="20">
                                                             <use xlinkHref="#olymp-twitter-icon"></use>
@@ -333,14 +355,14 @@ function UpdateProfile() {
                                                     </div>
                                                     <div className="form-group with-icon label-floating is-empty">
                                                         <label className="control-label">Your RSS Feed Account</label>
-                                                        <input  value="-" onChange={(e) => setRss(e.target.value)}  className="form-control" type="text" />
+                                                        <input  onChange={(e) => setRss(e.target.value)}  className="form-control" type="text" />
                                                         <svg className="c-rss" width="20" height="20">
                                                             <use xlinkHref="#olymp-rss-icon"></use>
                                                         </svg>
                                                     </div>
                                                     <div className="form-group with-icon label-floating">
                                                         <label className="control-label">Your Dribbble Account</label>
-                                                        <input  value="-" onChange={(e) => setDribble(e.target.value)}  className="form-control" type="text"
+                                                        <input  onChange={(e) => setDribble(e.target.value)}  className="form-control" type="text"
                                                             defaultValue="www.dribbble.com/thecowboydesigner" />
                                                         <svg className="c-dribbble" width="20" height="20">
                                                             <use xlinkHref="#olymp-dribble-icon"></use>
@@ -348,7 +370,7 @@ function UpdateProfile() {
                                                     </div>
                                                     <div className="form-group with-icon label-floating is-empty">
                                                         <label className="control-label">Your Spotify Account</label>
-                                                        <input value="-" onChange={(e) => setSpotify(e.target.value)}  className="form-control" type="text" />
+                                                        <input onChange={(e) => setSpotify(e.target.value)}  className="form-control" type="text" />
                                                         <svg className="c-spotify" width="20" height="20">
                                                             <use xlinkHref="#olymp-spotify-icon"></use>
                                                         </svg>
@@ -641,12 +663,9 @@ function UpdateProfile() {
                                   </h6>
                                 </div>
                                 <div className="ui-block-content">
-                          
+                                  {/* Form Hobbies and Interests */}
 
-                                  {
-                                  
-                                  
-                                  <form>
+                                  {/* <form>
                                     <div className="row">
                                       <div className="col col-lg-6 col-md-6 col-sm-12 col-12">
                                         <div className="form-group">
@@ -739,10 +758,9 @@ function UpdateProfile() {
                                         </button>
                                       </div>
                                     </div>
-                                  </form> 
-                                  }
+                                  </form> */}
 
-               
+                                  {/* ... end Form Hobbies and Interests */}
                                 </div>
                               </div>
                             </div>
