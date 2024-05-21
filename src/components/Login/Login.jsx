@@ -39,9 +39,9 @@ function Login() {
             genre,
           });
           if(response.status == 200) {
-
             localStorage.setItem("token", JSON.stringify(response.data.access_token))
             setToken(response.data.access_token);
+            setToken(JSON.stringify(response.data.user));
             axios.interceptors.request.use(
                 (config) => {
                   config.headers.Authorization = 'Bearer ' + response.data.access_token;
@@ -52,20 +52,6 @@ function Login() {
                   return Promise.reject(error);
                 }
             );
-
-            try {
-
-                const response = await axios.get('/api/user', {
-
-                });
-                localStorage.setItem("user", JSON.stringify(response.data))
-                if(response.status == 200) {
-                    document.location.href = '/dashboard'
-                 // navigateTo('/dashboard')
-                }
-              } catch (error) {
-                alert("L'username o la password inserite non sono corrette")
-              }    
           }
     
         } catch (error) {
@@ -95,33 +81,19 @@ function Login() {
             password
           });
           if(response.status == 200) {
-        
             localStorage.setItem("token", JSON.stringify(response.data.access_token))
             setToken(response.data.access_token);
+            setToken(JSON.stringify(response.data.user));
             axios.interceptors.request.use(
                 (config) => {
                   config.headers.Authorization = 'Bearer ' + response.data.access_token;
                   return config;
                 },
                 (error) => {
-                alert("Errore di comunicazione con il server")
+                alert("L'username o la password inserite non sono corrette")
                   return Promise.reject(error);
                 }
             );
-
-            try {
-
-                const response = await axios.get('/api/user', {
-
-                });
-                localStorage.setItem("user", JSON.stringify(response.data))
-                if(response.status == 200) {
-                    document.location.href = '/dashboard'
-                 // navigateTo('/dashboard')
-                }
-              } catch (error) {
-                alert("Errore di comunicazione con il server")
-              }            
           }
         } catch (error) {
             alert("Errore di comunicazione con il server")
