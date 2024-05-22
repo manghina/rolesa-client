@@ -6,11 +6,15 @@ import Routes from "./router";
 // import Dashboard from './components/Dashboard/Dashboard'
 // import Profile from './components/Profile/Profile'
 // import Register from './components/Register/Register'
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 function App() {
   return (
     <AuthProvider>
-      <Routes />
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <Routes />
+      </LocalizationProvider>
     </AuthProvider>
   );
 }

@@ -1,12 +1,115 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import LeftSidebar from '../Sidebars/LeftSidebar'
 import RightSidebar from '../Sidebars/RightSidebar'
 import Header from '../Header/Header'
+import Box from '@mui/material/Box';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
+import dayjs from 'dayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
+import axios from '../../../axios.config'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+
+const sampleAddresses = [
+    { label: 'New York, NY' },
+    { label: 'Los Angeles, CA' },
+    { label: 'Chicago, IL' },
+    { label: 'Houston, TX' },
+    { label: 'Phoenix, AZ' },
+    { label: 'Philadelphia, PA' },
+    { label: 'San Antonio, TX' },
+    { label: 'San Diego, CA' },
+    { label: 'Dallas, TX' },
+    { label: 'San Jose, CA' },
+    { label: 'Austin, TX' },
+    { label: 'Jacksonville, FL' },
+    { label: 'Fort Worth, TX' },
+    { label: 'Columbus, OH' },
+    { label: 'Charlotte, NC' },
+    { label: 'San Francisco, CA' },
+    { label: 'Indianapolis, IN' },
+    { label: 'Seattle, WA' },
+    { label: 'Denver, CO' },
+    { label: 'Washington, DC' },
+  ];
+
 
 function Dashboard() {
-    const [date, setDate] = useState('');
+    const [date, setDate] = useState(dayjs().format('MM-DD-YYYY'));
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [location, setLocation] = useState('');
+    const [category, setCategory] = useState('');
+    const [posts, setPosts] = useState([]);
+    const [refreshCount, setRefreshCount] = useState(0);
+
+    const handleCreatePost = async() => {
+        try {
+            const token = localStorage.getItem('token');
+
+            const response = await axios.put('/api/posts', {
+                title,
+                description,
+                date,
+                location,
+                category,
+                "parent_id": null,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if(response.status == 200) {
+                console.log("response: ", response)
+                alert('Post created successfully.')
+                setRefreshCount(prev => prev + 1);
+            } else {
+                console.log("no good response: ", response)
+            }
+        }catch (e){
+            console.log("error: ", e)
+        }
+
+      };
+
+    const formatDateToDayjs = (dateString) => {
+        return dayjs(dateString, 'MM-DD-YYYY');
+    };
+
+    const handleDateChange = (date) => {
+        const newDateString = date ? date.format('MM-DD-YYYY') : '';
+        setDate(newDateString);
+    };
+
+    const getAllPosts = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('Token not found in localStorage');
+                return;
+            }
+    
+            const response = await axios.get('/api/posts', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+    
+            setPosts(response?.data?.data);
+        } catch (e) {
+            console.error('Error fetching posts:', e);
+        }
+    };
+
+    useEffect(() => {
+        getAllPosts();
+    }, [refreshCount]);
 
     return (
         <>
@@ -48,56 +151,102 @@ function Dashboard() {
                                 <div className="ui-block-title ui-block-title-small">
                                     <h6 className="title">AGGIUNGI EVENTO</h6>
                                 </div>
-                                <h1 className="text-3xl font-bold underline">
-      Hello world!
-    </h1>
 
-                                <table className="event-item-table">
-                                    <tbody>
-                                        <tr className="event-item">
-                                            <td className="upcoming">
-                                                <div className="date-event">
+                                <Grid container spacing={2} className="event-item">
+                                    <Grid item xs={12} sm={3}>
+                                        <TextField
+                                        fullWidth
+                                        id="outlined-title"
+                                        label="Title"
+                                        variant="outlined"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={9}>
+                                        <TextField
+                                        fullWidth
+                                        id="outlined-description"
+                                        label="Description"
+                                        variant="outlined"
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                        />
+                                    </Grid>
 
-                                                    <svg className="olymp-small-calendar-icon"><use xlinkHref="#olymp-small-calendar-icon"></use></svg>
-
-                                                    <span className="day">{date}</span>
-                                                    <span className="month">{date}</span>
-                                                </div>
-                                            </td>
-                                            <td className="author">
-                                                <div className="event-author inline-items">
-                                                    <div className="author-thumb">
-                                                        <img loading="lazy" src="/assets/img/avatar66-sm.webp" alt="author" width="34" height="34" />
-                                                    </div>
-                                                    <div className="author-date">
-                                                        <a href="#" className="author-name h6">
-                                                            <input value={title} onChange={(e) => setTitle(e.target.value)}  className="form-control" placeholder="Titolo" type="text" />
-                                                        </a>
-                                                        <time className="published" dateTime="2017-03-24T18:18">{date}</time>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="location">
-                                                <div className="place inline-items">
-                                                    <svg className="olymp-add-a-place-icon"><use xlinkHref="#olymp-add-a-place-icon"></use></svg>
-                                                    <span></span>
-                                                </div>
-                                            </td>
-                                            <td className="description">
-                                                <p className="description">
-                                                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="form-control" placeholder="Descrizione"></textarea>
-                                                </p>
-                                            </td>
-                                            <td className="users">
-
-                                            </td>
-                                            <td className="add-event">
-                                                <a href="20-CalendarAndEvents-MonthlyCalendar.html" className="btn btn-breez btn-sm">Crea</a>
-                                            </td>
-
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                    <Grid item xs={12} sm={6} md={3}>
+                                        <DatePicker
+                                        label="Date Picker"
+                                        value={formatDateToDayjs(date)}
+                                        onChange={(d) => handleDateChange(d)}
+                                        renderInput={(params) => <TextField fullWidth {...params} />}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={6} md={3}>
+                                        <Autocomplete
+                                        disablePortal
+                                        id="address-combo-box"
+                                        options={sampleAddresses}
+                                        onChange={(event, newValue) => {
+                                            setLocation(newValue.label);
+                                        }}
+                                        renderInput={(params) => <TextField fullWidth {...params} label="Address" />}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={6} md={3}>
+                                        <FormControl fullWidth>
+                                        <InputLabel>Category</InputLabel>
+                                        <Select
+                                            value={category}
+                                            label="Category"
+                                            onChange={(e) => setCategory(e.target.value)}
+                                        >
+                                            <MenuItem value={'category1'}>Category1</MenuItem>
+                                            <MenuItem value={'category2'}>Category2</MenuItem>
+                                            <MenuItem value={'category3'}>Category3</MenuItem>
+                                        </Select>
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid item xs={12} sm={6} md={3}>
+                                        <Box height="100%" display="flex" alignItems="center">
+                                        <Button
+                                            fullWidth
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={handleCreatePost}
+                                            style={{ height: '100%' }} // Ensure the button takes full height
+                                        >
+                                            Create
+                                        </Button>
+                                        </Box>
+                                    </Grid>
+                                </Grid>
+                            </div>
+                            <div>   
+                            <TableContainer component={Paper}>
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>Title</TableCell>
+                                            <TableCell>Location</TableCell>
+                                            <TableCell>Description</TableCell>
+                                            <TableCell>Author</TableCell>
+                                            <TableCell>Category</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {posts && posts.map((post) => (
+                                            <TableRow key={post.id}>
+                                                <TableCell>{post.title}</TableCell>
+                                                <TableCell>{post.location}</TableCell>
+                                                <TableCell>{post.description}</TableCell>
+                                                <TableCell>{post.user.name}</TableCell>
+                                                <TableCell>{post.category}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
                             </div>
                         </div>
                     </div>
