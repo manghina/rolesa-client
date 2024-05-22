@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import LeftSidebar from '../Sidebars/LeftSidebar'
 import RightSidebar from '../Sidebars/RightSidebar'
 import Header from '../Header/Header'
-import Box from '@mui/material/Box';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
@@ -12,9 +11,9 @@ import Autocomplete from '@mui/material/Autocomplete';
 import dayjs from 'dayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Grid from '@mui/material/Grid';
-import Button from '@mui/material/Button';
 import axios from '../../../axios.config'
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+
+import { Card, CardContent, Typography, CardActions, Button, Box } from '@mui/material';
 
 const sampleAddresses = [
     { label: 'New York, NY' },
@@ -48,35 +47,80 @@ function Dashboard() {
     const [category, setCategory] = useState('');
     const [posts, setPosts] = useState([]);
     const [refreshCount, setRefreshCount] = useState(0);
+    const [updatePostId, setUpdatePostId] = useState(null);
+    const [isCreate, setIsCreate] = useState(true);
 
-    const handleCreatePost = async() => {
+    const clearPostInfo = () => {
+        setTitle('');
+        setDescription('');
+        setDate(dayjs().format('MM-DD-YYYY'));
+        setLocation('');
+        setCategory('');
+        setUpdatePostId(null);
+        setIsCreate(true);        
+    }
+
+    const handleCreateOrUpdatePost = async() => {
         try {
             const token = localStorage.getItem('token');
-
-            const response = await axios.put('/api/posts', {
-                title,
-                description,
-                date,
-                location,
-                category,
-                "parent_id": null,
-            }, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            if(response.status == 200) {
-                console.log("response: ", response)
-                alert('Post created successfully.')
-                setRefreshCount(prev => prev + 1);
+            if(isCreate) {
+                const response = await axios.put('/api/posts', {
+                    title,
+                    description,
+                    date,
+                    location,
+                    category,
+                    "parent_id": null,
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                if(response.status == 200) {
+                    console.log("response: ", response)
+                    alert('Post created successfully.')
+                    setRefreshCount(prev => prev + 1);
+                } else {
+                    console.log("no good response: ", response)
+                }
             } else {
-                console.log("no good response: ", response)
+                // Update
+                const response = await axios.post('/api/posts', {
+                    id: updatePostId,
+                    title,
+                    description,
+                    date,
+                    location,
+                    category,
+                    "parent_id": null,
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                if(response.status == 200) {
+                    console.log("response: ", response)
+                    alert('Post created successfully.')
+                    setRefreshCount(prev => prev + 1);
+                } else {
+                    console.log("no good response: ", response)
+                }
             }
         }catch (e){
             console.log("error: ", e)
         }
-
+        clearPostInfo()
       };
+
+    const handleUpdatePost = async(post) => {
+        setUpdatePostId(post.id);
+        setTitle(post.title);
+        setDescription(post.description);
+        setLocation(post.location);
+        setCategory(post.category);
+        setDate(dayjs().format('MM-DD-YYYY'));
+        setIsCreate(false);
+    } 
 
     const formatDateToDayjs = (dateString) => {
         return dayjs(dateString, 'MM-DD-YYYY');
@@ -187,6 +231,7 @@ function Dashboard() {
                                         disablePortal
                                         id="address-combo-box"
                                         options={sampleAddresses}
+                                        value={{label: location}}
                                         onChange={(event, newValue) => {
                                             setLocation(newValue.label);
                                         }}
@@ -213,40 +258,37 @@ function Dashboard() {
                                             fullWidth
                                             variant="contained"
                                             color="primary"
-                                            onClick={handleCreatePost}
+                                            onClick={handleCreateOrUpdatePost}
                                             style={{ height: '100%' }} // Ensure the button takes full height
                                         >
-                                            Create
+                                            { isCreate? 'Create' : 'Update' }
                                         </Button>
                                         </Box>
                                     </Grid>
                                 </Grid>
                             </div>
                             <div>   
-                            <TableContainer component={Paper}>
-                                <Table>
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell>Title</TableCell>
-                                            <TableCell>Location</TableCell>
-                                            <TableCell>Description</TableCell>
-                                            <TableCell>Author</TableCell>
-                                            <TableCell>Category</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {posts && posts.map((post) => (
-                                            <TableRow key={post.id}>
-                                                <TableCell>{post.title}</TableCell>
-                                                <TableCell>{post.location}</TableCell>
-                                                <TableCell>{post.description}</TableCell>
-                                                <TableCell>{post.user.name}</TableCell>
-                                                <TableCell>{post.category}</TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
+                            {posts && posts.map((post) => (
+                                <Card key={post.id} sx={{ maxWidth: "100%", margin: '1rem auto', borderRadius: 2, boxShadow: 3 }}>
+                                    <CardContent>
+                                        <Typography gutterBottom variant="h5" component="div">
+                                            {post.title}
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            {post.description}
+                                        </Typography>
+                                    </CardContent>
+                                    <CardActions sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Box>
+                                            <Button size="small">{post.category}</Button>
+                                            <Button size="small" sx={{mx: 4}}>{post.location}</Button>
+                                        </Box>
+                                        <Button size="small" variant='contained' color="primary" onClick={() => handleUpdatePost(post)}>
+                                            Edit
+                                        </Button>
+                                    </CardActions>
+                                </Card>
+                            ))}
                             </div>
                         </div>
                     </div>
