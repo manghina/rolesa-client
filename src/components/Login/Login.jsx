@@ -41,17 +41,6 @@ function Login() {
           if(response.status == 200) {
             localStorage.setItem("token", JSON.stringify(response.data.access_token))
             setToken(response.data.access_token);
-            setToken(JSON.stringify(response.data.user));
-            axios.interceptors.request.use(
-                (config) => {
-                  config.headers.Authorization = 'Bearer ' + response.data.access_token;
-                  return config;
-                },
-                (error) => {
-                alert("L'username o la password inserite non sono corrette")
-                  return Promise.reject(error);
-                }
-            );
           }
     
         } catch (error) {
@@ -83,17 +72,6 @@ function Login() {
           if(response.status == 200) {
             localStorage.setItem("token", JSON.stringify(response.data.access_token))
             setToken(response.data.access_token);
-            setToken(JSON.stringify(response.data.user));
-            axios.interceptors.request.use(
-                (config) => {
-                  config.headers.Authorization = 'Bearer ' + response.data.access_token;
-                  return config;
-                },
-                (error) => {
-                alert("L'username o la password inserite non sono corrette")
-                  return Promise.reject(error);
-                }
-            );
           }
         } catch (error) {
             alert("Errore di comunicazione con il server")
