@@ -9,17 +9,13 @@ import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import dayjs from "dayjs";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import Grid from "@mui/material/Grid";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import axios from "../../../axios.config";
 
 import {
-  Card,
-  CardContent,
-  Typography,
-  CardActions,
   Button,
   Box,
+  Grid
 } from "@mui/material";
 
 const sampleAddresses = [
@@ -46,7 +42,8 @@ const sampleAddresses = [
 ];
 
 function Dashboard() {
-  const [date, setDate] = useState(dayjs().format("MM-DD-YYYY"));
+  const [date, setDate] = useState(dayjs().format("MM-DD-YYYY HH:MM"));
+  const [createdDate, setCreatedDate] = useState(dayjs().format("MM-DD-YYYY HH:MM"));
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
@@ -55,11 +52,21 @@ function Dashboard() {
   const [refreshCount, setRefreshCount] = useState(0);
   const [updatePostId, setUpdatePostId] = useState(null);
   const [isCreate, setIsCreate] = useState(true);
+  const [disabledSubmit, setDisabledSubmit] = useState(true);
+
+  useEffect(()=> {
+    if(date && title && description && location && category) {
+      setDisabledSubmit(false);
+    }else {
+      setDisabledSubmit(true)
+    }
+  }, [date, title, description, location, category])
 
   const clearPostInfo = () => {
     setTitle("");
     setDescription("");
-    setDate(dayjs().format("MM-DD-YYYY"));
+    setDate(dayjs().format("MM-DD-YYYY HH:MM"));
+    setCreatedDate(dayjs().format("MM-DD-YYYY HH:MM"));
     setLocation("");
     setCategory("");
     setUpdatePostId(null);
@@ -75,10 +82,11 @@ function Dashboard() {
           {
             title,
             description,
-            date,
             location,
             category,
             parent_id: null,
+            created_at: date,
+            updated_at: date
           },
           {
             headers: {
@@ -101,10 +109,11 @@ function Dashboard() {
             id: updatePostId,
             title,
             description,
-            date,
             location,
             category,
             parent_id: null,
+            created_at: createdDate,
+            updated_at: date,
           },
           {
             headers: {
@@ -132,16 +141,17 @@ function Dashboard() {
     setDescription(post.description);
     setLocation(post.location);
     setCategory(post.category);
-    setDate(dayjs().format("MM-DD-YYYY"));
+    setDate(post.created_at);
+    setCreatedDate(post.updated_at);
     setIsCreate(false);
   };
 
   const formatDateToDayjs = (dateString) => {
-    return dayjs(dateString, "MM-DD-YYYY");
+    return dayjs(dateString, "MM-DD-YYYY HH:MM");
   };
 
   const handleDateChange = (date) => {
-    const newDateString = date ? date.format("MM-DD-YYYY") : "";
+    const newDateString = date ? date.format("MM-DD-YYYY HH:MM") : "";
     setDate(newDateString);
   };
 
@@ -201,7 +211,7 @@ function Dashboard() {
           <div className="row">
             <div className="col col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
               <div className="ui-block">
-                <div className="ui-block-title ui-block-title-small">
+                <div className="ui-block-title ui-block-title-small w-100">
                   <h6 className="title">AGGIUNGI EVENTO</h6>
                 </div>
 
@@ -228,7 +238,7 @@ function Dashboard() {
                   </Grid>
 
                   <Grid item xs={12} sm={6} md={3}>
-                    <DatePicker
+                    <DateTimePicker
                       label="Date Picker"
                       value={formatDateToDayjs(date)}
                       onChange={(d) => handleDateChange(d)}
@@ -272,6 +282,7 @@ function Dashboard() {
                         variant="contained"
                         color="primary"
                         onClick={handleCreateOrUpdatePost}
+                        disabled={disabledSubmit}
                         style={{ height: "100%" }} // Ensure the button takes full height
                       >
                         {isCreate ? "Create" : "Update"}
@@ -287,139 +298,135 @@ function Dashboard() {
         <div className="container">
           <div className="row">
             <div className="col col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-              <div className="ui-block">
-                <div className="ui-block-title ui-block-title-small">
-                  <h6 className="title">UPCOMING EVENTS 2016</h6>
+              <div>
+                <div className="ui-block-title ui-block-title-small bg-white w-100">
+                  <h6 className="title">UPCOMING EVENTS</h6>
                 </div>
-
-                <table className="event-item-table">
-                  <tbody>
-                    {posts &&
-                      posts.map((post) => (
-                        <tr className="event-item" key={post.id}>
-                          <td className="upcoming">
-                            <div className="date-event">
-                              <svg className="olymp-small-calendar-icon">
-                                <use xlinkHref="#olymp-small-calendar-icon"></use>
-                              </svg>
-
-                              <span className="day">28</span>
-                              <span className="month">may</span>
+                {posts &&
+                  posts.map((post) => (
+                    <div
+                      className="event-item d-flex justify-content-between mb-2 bg-white"
+                      key={post.id}
+                    >
+                      <div className="upcoming d-flex gap-4"  style={{width: '15%'}}>
+                        <div className="date-event">
+                          <svg className="olymp-small-calendar-icon">
+                            <use xlinkHref="#olymp-small-calendar-icon"></use>
+                          </svg>
+                          <span className="day">{dayjs(post.date).format('DD')}</span>
+                          <span className="month">{dayjs(post.date).format('MMMM').toLocaleLowerCase()}</span>
+                        </div>
+                        <div className="author">
+                          <div className="event-author inline-items">
+                            <div className="author-thumb d-flex align-items-center gap-3">
+                              <img
+                                loading="lazy"
+                                src="/assets/img/avatar66-sm.webp"
+                                alt="author"
+                                width="34"
+                                height="34"
+                              />
+                              <a href="#" className="author-name h6">
+                                {post.title}
+                              </a>
                             </div>
-                          </td>
-                          <td className="author">
-                            <div className="event-author inline-items">
-                              <div className="author-thumb">
-                                <img
-                                  loading="lazy"
-                                  src="/assets/img/avatar66-sm.webp"
-                                  alt="author"
-                                  width="34"
-                                  height="34"
-                                />
-                              </div>
-                              <div className="author-date">
-                                <a href="#" className="author-name h6">
-                                  {post.title}
-                                </a>
-                                <time
-                                  className="published"
-                                  dateTime="2017-03-24T18:18"
-                                >
-                                  Saturday at 9:00pm
-                                </time>
-                              </div>
+                            <div className="author-date">
+                              <time
+                                className="published"
+                              >
+                                {dayjs(date).format('dddd [at] h:mmA')}
+                              </time>
                             </div>
-                          </td>
-                          <td className="location">
-                            <div className="place inline-items">
-                              <svg className="olymp-add-a-place-icon">
-                                <use xlinkHref="#olymp-add-a-place-icon"></use>
-                              </svg>
-                              <span>{post.location}</span>
-                            </div>
-                          </td>
-                          <td className="description">
-                            <p className="description">{post.description}</p>
-                          </td>
-                          <td className="users">
-                            <ul className="friends-harmonic">
-                              <li>
-                                <a href="#">
-                                  <img
-                                    loading="lazy"
-                                    src="/assets/img/friend-harmonic5.webp"
-                                    alt="friend"
-                                    width="28"
-                                    height="28"
-                                  />
-                                </a>
-                              </li>
-                              <li>
-                                <a href="#">
-                                  <img
-                                    loading="lazy"
-                                    src="/assets/img/friend-harmonic10.webp"
-                                    alt="friend"
-                                    width="28"
-                                    height="28"
-                                  />
-                                </a>
-                              </li>
-                              <li>
-                                <a href="#">
-                                  <img
-                                    loading="lazy"
-                                    src="/assets/img/friend-harmonic7.webp"
-                                    alt="friend"
-                                    width="28"
-                                    height="28"
-                                  />
-                                </a>
-                              </li>
-                              <li>
-                                <a href="#">
-                                  <img
-                                    loading="lazy"
-                                    src="/assets/img/friend-harmonic8.webp"
-                                    alt="friend"
-                                    width="28"
-                                    height="28"
-                                  />
-                                </a>
-                              </li>
-                              <li>
-                                <a href="#">
-                                  <img
-                                    loading="lazy"
-                                    src="/assets/img/friend-harmonic2.webp"
-                                    alt="friend"
-                                    width="28"
-                                    height="28"
-                                  />
-                                </a>
-                              </li>
-                              <li>
-                                <a href="#" className="all-users bg-breez">
-                                  +24
-                                </a>
-                              </li>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="location"  style={{width: '10%'}}>
+                        <div className="place inline-items">
+                          <svg className="olymp-add-a-place-icon">
+                            <use xlinkHref="#olymp-add-a-place-icon"></use>
+                          </svg>
+                          <span>{post.location}</span>
+                        </div>
+                      </div>
+                      <div className="description"  style={{width: '25%'}}>
+                        <p className="description">{post.description}</p>
+                      </div>
+                      <div className="users">
+                        <ul className="friends-harmonic">
+                          <li>
+                            <a href="#">
+                              <img
+                                loading="lazy"
+                                src="/assets/img/friend-harmonic5.webp"
+                                alt="friend"
+                                width="28"
+                                height="28"
+                              />
+                            </a>
+                          </li>
+                          <li>
+                            <a href="#">
+                              <img
+                                loading="lazy"
+                                src="/assets/img/friend-harmonic10.webp"
+                                alt="friend"
+                                width="28"
+                                height="28"
+                              />
+                            </a>
+                          </li>
+                          <li>
+                            <a href="#">
+                              <img
+                                loading="lazy"
+                                src="/assets/img/friend-harmonic7.webp"
+                                alt="friend"
+                                width="28"
+                                height="28"
+                              />
+                            </a>
+                          </li>
+                          <li>
+                            <a href="#">
+                              <img
+                                loading="lazy"
+                                src="/assets/img/friend-harmonic8.webp"
+                                alt="friend"
+                                width="28"
+                                height="28"
+                              />
+                            </a>
+                          </li>
+                          <li>
+                            <a href="#">
+                              <img
+                                loading="lazy"
+                                src="/assets/img/friend-harmonic2.webp"
+                                alt="friend"
+                                width="28"
+                                height="28"
+                              />
+                            </a>
+                          </li>
+                          <li>
+                            <a href="#" className="all-users bg-breez">
+                              +24
+                            </a>
+                          </li>
 
-                              <li className="with-text">{post.category}</li>
-                            </ul>
-                          </td>
-                          <td className="add-event">
-                            <span
-                              className="btn btn-breez btn-sm"
-                              onClick={() => handleUpdatePost(post)}
-                            >
-                              Edit
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
+                          <li className="with-text">{post.category}</li>
+                        </ul>
+                      </div>
+                      <div className="add-event">
+                        <span
+                          className="btn btn-breez btn-sm"
+                          onClick={() => handleUpdatePost(post)}
+                        >
+                          Edit
+                        </span>
+                      </div>
+                    </div>
+                  ))}
               </div>
             </div>
           </div>
